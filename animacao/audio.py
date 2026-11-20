@@ -6,9 +6,13 @@ from scipy.signal import butter, sosfilt
 SR = 44100
 AQUI = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.path.join(AQUI, "build")
-TL = json.load(open(os.path.join(BUILD, "timeline.json")))
-DUR = TL["duracao"] + 0.5
-N = int(DUR * SR)
+TL = N = None
+
+
+def carrega_timeline():
+    global TL, N
+    TL = json.load(open(os.path.join(BUILD, "timeline.json")))
+    N = int((TL["duracao"] + 0.5) * SR)
 rng = np.random.RandomState(42)
 
 
@@ -271,6 +275,7 @@ def cena(nome):
 
 
 def main():
+    carrega_timeline()
     voz = np.zeros(N)
     for f in TL["falas"]:
         a = le_wav(f["arquivo"])

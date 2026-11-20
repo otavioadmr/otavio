@@ -642,3 +642,55 @@ def mao_gigante(ctx, x, y, s=1.0, alpha=1.0):
     forma(ctx, [(-160, -150), (160, -150), (160, -500), (-160, -500)], fill=PELE, w=9, alpha=alpha)
     forma(ctx, [(160, -60), (230, -150), (200, -200), (150, -150)], fill=PELE, w=9, alpha=alpha)
     ctx.restore()
+
+
+
+# ---------------------------------------------------------------- mascote do canal
+BONE = (0.20, 0.45, 0.90)
+BONE_ABA = (0.14, 0.32, 0.70)
+
+
+def mascote(ctx, x, y, s=1.0, humor="normal", fala=0.0, t=0.0, braco_e=0.5, braco_d=0.5, pulo=0.0,
+            olhar=(0, 0), andando=False, aceno=False, aba=1):
+    """Boneco de palito com rosto redondo e boné. x,y = chão entre os pés. aba=1 boné pra frente, -1 pra trás."""
+    ctx.save()
+    ctx.translate(x, y - pulo)
+    ctx.scale(s, s)
+    quadril, ombro = -190, -360
+    # pernas
+    for k, sx in enumerate((-1, 1)):
+        sw = math.sin(t * 12 + k * math.pi) * 30 if andando else 0
+        linha(ctx, [(0, quadril), (sx * 45 + sw, -10)], 10)
+        linha(ctx, [(sx * 45 + sw, -10), (sx * 45 + sw + sx * 32, -8)], 10)
+    # tronco
+    linha(ctx, [(0, ombro + 10), (0, quadril)], 10)
+    # braços (cotovelo leve)
+    def braco(sx, ang, onda):
+        a = ang + (math.sin(t * 14) * 0.4 if onda else 0)
+        oy = ombro + 30
+        cx, cy = sx * math.sin(a * 0.55 + 0.25) * 90, oy + math.cos(a * 0.55 + 0.25) * 90
+        ex, ey = cx + sx * math.sin(a) * 90, cy + math.cos(a) * 90
+        linha(ctx, [(0, oy), (cx, cy), (ex, ey)], 10)
+    braco(-1, braco_e, False)
+    braco(1, braco_d, aceno)
+    # cabeça redonda
+    hy, r = ombro - 115, 115
+    elipse(ctx, 0, hy, r, r, fill=BRANCO, w=9)
+    disco(ctx, -62, hy + 38, 17, ROSA, 0.55)
+    disco(ctx, 62, hy + 38, 17, ROSA, 0.55)
+    if humor == "piscadinha":
+        elipse(ctx, -36, hy + 2, 20, 25, fill=BRANCO, w=6)
+        disco(ctx, -36 + olhar[0] * 0.5, hy + 7, 11, S.ink)
+        linha(ctx, pontos_elipse(36, hy + 8, 18, 14, 10, math.pi * 1.1, math.pi * 1.9), 7)
+    else:
+        _olhos(ctx, 0, hy + 2, 36, humor, _pisca(t, 5), olhar, r=20)
+    _boca(ctx, 0, hy + 60, "feliz" if humor in ("normal", "piscadinha") else humor, fala, 34)
+    # boné: copa + botão + aba
+    copa = [(-r - 4, hy - 30)] + [(math.cos(a) * (r + 6), hy - 30 + math.sin(a) * 105)
+                                  for a in [math.pi + k * math.pi / 14 for k in range(15)]] + [(r + 4, hy - 30)]
+    forma(ctx, copa, fill=BONE, w=8)
+    linha(ctx, [(0, hy - 133), (0, hy - 30)], 4, BONE_ABA)
+    disco(ctx, 0, hy - 136, 11, BONE_ABA)
+    ab = [(aba * 40, hy - 40), (aba * 200, hy - 32), (aba * 205, hy - 14), (aba * 40, hy - 18)]
+    forma(ctx, ab, fill=BONE_ABA, w=8)
+    ctx.restore()
