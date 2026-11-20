@@ -2,7 +2,7 @@
 import cairo, desenho as D, mascote as M
 s = cairo.ImageSurface(cairo.FORMAT_ARGB32, D.W, D.H); c = cairo.Context(s)
 D.papel(c)
-D.texto(c, "O MASCOTE", 540, 150, 100, fill=M.PALETA["bone"], stroke=(0.1, 0.1, 0.1), sw=18)
+D.texto(c, "GABRIEL", 540, 150, 100, fill=M.PALETA["bone"], stroke=(0.1, 0.1, 0.1), sw=18)
 M.desenha(c, 540, 1420, 0.95, humor="normal", t=1.0, braco_d=2.5, dobra_d=0.5, braco_e=0.15)
 poses = [("feliz", dict(humor="feliz", braco_e=2.4, braco_d=2.4, dobra_e=0.4, dobra_d=0.4)),
          ("piscadinha", dict(humor="piscadinha", braco_d=1.5, dobra_d=0.1)),

@@ -231,7 +231,7 @@ def _boca(ctx, x, y, humor, fala):
 
 
 def desenha(ctx, x, y, s=1.0, humor="normal", fala=0.0, t=0.0, braco_e=0.2, braco_d=0.2, dobra_e=0.1,
-            dobra_d=0.1, aceno=False, olhar=(0, 0), pulo=0.0, paleta=None, barba=True):
+            dobra_d=0.1, aceno=False, olhar=(0, 0), pulo=0.0, paleta=None, barba=True, bigode=True):
     P = dict(PALETA, **(paleta or {}))
     ctx.save()
     # sombra no chão
@@ -348,7 +348,7 @@ def desenha(ctx, x, y, s=1.0, humor="normal", fala=0.0, t=0.0, braco_e=0.2, brac
     # costeletas
     for lado in (-1, 1):
         ctx.new_path()
-        ctx.move_to(lado * (rx - 2), hy - 88)
+        ctx.move_to(lado * (rx - 2), hy - 96)
         ctx.curve_to(lado * (rx + 4), hy - 30, lado * rx, hy, lado * (rx - 8), hy + 14)
         ctx.line_to(lado * (rx - 22), hy - 60)
         ctx.close_path()
@@ -380,52 +380,77 @@ def desenha(ctx, x, y, s=1.0, humor="normal", fala=0.0, t=0.0, braco_e=0.2, brac
     ctx.set_source_rgba(*_cor(P["pele_sombra"]))
     ctx.set_line_width(6)
     ctx.stroke()
-    _boca(ctx, hx, hy + 70, "feliz" if humor in ("normal", "piscadinha") else humor, fala)
+    _boca(ctx, hx, hy + 84, "feliz" if humor in ("normal", "piscadinha") else humor, fala)
 
-    # --- boné
-    ctx.save()
-    rosto()
-    ctx.clip()
-    g = cairo.LinearGradient(0, hy - 98, 0, hy - 62)
-    g.add_color_stop_rgba(0, 0, 0, 0, 0.3)
-    g.add_color_stop_rgba(1, 0, 0, 0, 0)
-    ctx.set_source(g)
-    ctx.rectangle(-rx, hy - 110, 2 * rx, 50)
-    ctx.fill()
-    ctx.restore()
-    cy0 = hy - 92
+    # --- bigode
+    if bigode:
+        my = hy + 50
+        ctx.new_path()
+        ctx.move_to(0, my - 6)
+        ctx.curve_to(-18, my - 16, -44, my - 14, -58, my + 4)
+        ctx.curve_to(-62, my + 14, -54, my + 22, -44, my + 14)
+        ctx.curve_to(-30, my + 6, -12, my + 8, 0, my + 4)
+        ctx.curve_to(12, my + 8, 30, my + 6, 44, my + 14)
+        ctx.curve_to(54, my + 22, 62, my + 14, 58, my + 4)
+        ctx.curve_to(44, my - 14, 18, my - 16, 0, my - 6)
+        ctx.close_path()
+        _preenche(ctx, _grad_lin(0, my - 16, 0, my + 20, tuple(min(1, v * 1.5) for v in P["cabelo"]),
+                                 tuple(v * 0.6 for v in P["cabelo"])), 5)
+        ctx.new_path()
+        ctx.move_to(-40, my - 6)
+        ctx.curve_to(-26, my - 10, -14, my - 9, -6, my - 4)
+        ctx.set_source_rgba(1, 1, 1, 0.25)
+        ctx.set_line_width(3)
+        ctx.stroke()
+
+    # --- boné virado pra trás
+    cy0 = hy - 98
     r = rx
+    # aba saindo por trás da cabeça (lado esquerdo, meio caída)
+    ctx.new_path()
+    ctx.move_to(-r * 0.4, cy0 - 30)
+    ctx.curve_to(-r - 40, cy0 - 40, -r - 95, cy0 - 5, -r - 92, cy0 + 22)
+    ctx.curve_to(-r - 70, cy0 + 30, -r - 20, cy0 + 10, -r * 0.4, cy0 + 4)
+    ctx.close_path()
+    _preenche(ctx, _grad_lin(-r - 90, cy0 - 30, -r, cy0 + 25, P["bone"], P["bone_sombra"]), 7)
+    # franjinha de cabelo aparecendo na testa
+    ctx.new_path()
+    ctx.move_to(-r + 6, cy0 + 4)
+    ctx.curve_to(-60, cy0 + 26, 60, cy0 + 26, r - 6, cy0 + 4)
+    ctx.line_to(r - 6, cy0 - 6)
+    ctx.line_to(-r + 6, cy0 - 6)
+    ctx.close_path()
+    _preenche(ctx, P["cabelo"], 5)
+    # copa
     ctx.new_path()
     ctx.move_to(-r - 8, cy0)
-    ctx.curve_to(-r - 6, hy - 237, r + 6, hy - 237, r + 8, cy0)
-    ctx.curve_to(r * 0.5, cy0 + 12, -r * 0.5, cy0 + 12, -r - 8, cy0)
+    ctx.curve_to(-r - 6, hy - 243, r + 6, hy - 243, r + 8, cy0)
+    ctx.curve_to(r * 0.5, cy0 + 10, -r * 0.5, cy0 + 10, -r - 8, cy0)
     ctx.close_path()
-    _preenche(ctx, _grad_rad(hx - 8, hy - 130, 150, P["bone"], P["bone_sombra"], -0.3, -0.5), 7)
+    _preenche(ctx, _grad_rad(hx - 8, hy - 136, 150, P["bone"], P["bone_sombra"], -0.3, -0.5), 7)
     ctx.set_source_rgba(*_cor(P["bone_sombra"]))
     ctx.set_line_width(4)
-    topo = hy - 184
-    for cx in (-55, 0, 55):
+    topo = hy - 190
+    for cx in (-55, 55):
         ctx.new_path()
         ctx.move_to(cx * 0.08, topo + 4)
         ctx.curve_to(cx * 0.8, topo + 40, cx * 1.1, topo + 70, cx * 1.15, cy0 + 6)
         ctx.stroke()
     _elipse(ctx, 0, topo + 2, 13, 7)
     _preenche(ctx, P["bone_sombra"], 4)
+    # abertura de trás (snapback) agora na frente: arco mostrando o cabelo + tira de ajuste
     ctx.new_path()
-    ctx.move_to(-r * 0.9, cy0 + 5)
-    ctx.curve_to(-r * 0.5, cy0 + 34, r * 0.9, cy0 + 46, r + 62, cy0 + 18)
-    ctx.curve_to(r + 50, cy0 - 5, r * 0.4, cy0 - 2, -r * 0.9, cy0 + 5)
+    ctx.move_to(-42, cy0 + 9)
+    ctx.curve_to(-40, cy0 - 50, 40, cy0 - 50, 42, cy0 + 9)
     ctx.close_path()
-    _preenche(ctx, _grad_lin(0, cy0 - 5, 0, cy0 + 42, P["bone"], P["bone_sombra"]), 7)
-    ctx.new_path()
-    ctx.move_to(-r * 0.7, cy0 + 14)
-    ctx.curve_to(-r * 0.3, cy0 + 32, r * 0.8, cy0 + 37, r + 42, cy0 + 18)
-    ctx.set_source_rgba(1, 1, 1, 0.25)
-    ctx.set_line_width(3)
-    ctx.set_dash([9, 6])
-    ctx.stroke()
-    ctx.set_dash([])
-    _elipse(ctx, -58, hy - 142, 30, 12, -0.5)
+    _preenche(ctx, _grad_lin(0, cy0 - 45, 0, cy0 + 10, tuple(v * 0.7 for v in P["cabelo"]), P["cabelo"]), 6)
+    ctx.rectangle(-52, cy0 - 14, 104, 16)
+    _preenche(ctx, _grad_lin(0, cy0 - 14, 0, cy0 + 2, P["bone"], P["bone_sombra"]), 4)
+    for k in range(5):
+        _circulo(ctx, -32 + k * 16, cy0 - 6, 3.2)
+        ctx.set_source_rgba(1, 1, 1, 0.8)
+        ctx.fill()
+    _elipse(ctx, -60, hy - 150, 30, 12, -0.5)
     ctx.set_source_rgba(1, 1, 1, 0.3)
     ctx.fill()
     ctx.restore()
